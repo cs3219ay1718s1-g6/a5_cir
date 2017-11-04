@@ -3,6 +3,8 @@ const { expect } = chai
 const sinon = require('sinon')
 const sinonChai = require('sinon-chai')
 
+const TIME_EPSILON = 50
+
 chai.use(sinonChai)
 
 const Pipe = require('app/components/architecture/Pipe')
@@ -23,7 +25,7 @@ describe('Pipe', () => {
         setTimeout(() => {
             expect(spy).to.have.been.calledWith('hello')
             done()
-        }, 100)
+        }, TIME_EPSILON)
     })
 })
 
