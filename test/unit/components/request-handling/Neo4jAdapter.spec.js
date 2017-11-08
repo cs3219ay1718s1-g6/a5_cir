@@ -26,4 +26,18 @@ describe('Neo4jAdapter', () => {
             done()
         }).catch(done)
     })
+
+    it('should return the correct requested fields', done => {
+        const adapter = new Neo4jAdapter(session)
+        adapter.process(
+            `MATCH (p:Paper)-[:WITHIN]->(v:Venue) ` +
+            `WHERE v.venueID IN ['arxiv', 'icse'] ` +
+            `WITH v.venueName AS Venue, p.paperYear AS Year, Count(p) AS Count ` +
+            `RETURN Venue, Year, Count;`
+        ).then(result => {
+            expect(result).to.be.a('queryResult')
+            expect(result.row(0)).to.be.an('object').that.has.all.keys('Venue', 'Year', 'Count');
+            done()
+        }).catch(done)
+    })
 })
