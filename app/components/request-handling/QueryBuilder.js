@@ -1,4 +1,6 @@
 const Filter = require('../architecture/Filter')
+const { capitalize } = require('../../utils/StringUtils')
+
 /**
  * @class QueryBuilder
  * @description A Filter that takes in a Command and outputs a Query String
@@ -39,10 +41,12 @@ module.exports = class QueryBuilder extends Filter {
             query += 'v.venueName AS Venue, '
         }
         query += 'p.paperYear AS Year, COUNT(p) AS Count RETURN '
-        if (command.venues) {
-            query += 'Venue, '
+        if (command.groups) {
+            query += command.groups.map(g => capitalize(g.replace(/s$/, ''))).join(', ')
+        } else {
+            query += 'Year'
         }
-        query += 'Year, Count;'
+        query += ', Count;'
         return Promise.resolve(query)
     }
 }
