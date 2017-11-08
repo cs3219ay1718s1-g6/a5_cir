@@ -1,5 +1,4 @@
 const Filter = require('../architecture/Filter')
-const { cloneObject } = require('../../utils/ObjectUtils')
 
 // Constants
 const TREND_ALLOWED_KEYS = new Set(['years', 'start', 'end', 'venues'])
