@@ -31,7 +31,7 @@ describe('QueryBuilder', () => {
         })
     })
 
-    it('should parse `trend` queries with venues correctly', done => {
+    it('should parse `trend` queries of specific years with venues correctly', done => {
         const builder = new QueryBuilder()
         builder.process({
             type: 'TREND',
@@ -42,6 +42,26 @@ describe('QueryBuilder', () => {
             expect(result).to.be.a('string').that.is.equal(
                 `MATCH (p:Paper)-[:WITHIN]->(v:Venue) ` +
                 `WHERE v.venueID IN ['arxiv', 'icse'] AND p.paperYear IN [2011, 2012, 2013] ` +
+                `WITH v.venueName AS Venue, p.paperYear AS Year, COUNT(p) AS Count ` +
+                `RETURN Venue, Year, Count;`
+            )
+            done()
+        })
+    })
+
+    it('should parse `trend` queries of year start and end with venues correctly', done => {
+        const builder = new QueryBuilder()
+        builder.process({
+            type: 'TREND',
+            start: 2011,
+            end: 2013,
+            venues: ['arxiv', 'icse'],
+            groups: ['venues', 'years']
+        }).then(result => {
+            expect(result).to.be.a('string').that.is.equal(
+                `MATCH (p:Paper)-[:WITHIN]->(v:Venue) ` +
+                `WHERE v.venueID IN ['arxiv', 'icse'] AND ` +
+                `p.paperYear >= 2011 AND p.paperYear <= 2013 ` +
                 `WITH v.venueName AS Venue, p.paperYear AS Year, COUNT(p) AS Count ` +
                 `RETURN Venue, Year, Count;`
             )
