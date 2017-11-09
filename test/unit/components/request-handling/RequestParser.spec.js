@@ -99,22 +99,6 @@ describe('RequestParser', () => {
         }).catch(done)
     })
 
-    it('should strip `authors`', done => {
-        const parser = new RequestParser()
-        const mockRequest = createTrendRequest({
-            years: [2011, 2012, 2013],
-            authors: ['Ritsuro Suzuki', 'Kevin Tay', 'Cheng-Cheng Guo']
-        })
-        parser.process(mockRequest).then(result => {
-            expect(result.authors).to.be.an('array').that.has.all.members([
-                'ritsuro suzuki',
-                'kevin tay',
-                'chengcheng guo'
-            ])
-            done()
-        }).catch(done)
-    })
-
 })
 
 const createTrendRequest = (query) => ({

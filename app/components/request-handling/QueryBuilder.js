@@ -28,6 +28,9 @@ module.exports = class QueryBuilder extends Filter {
         if (command.venues) {
             query += '-[:WITHIN]->(v:Venue)'
         }
+        if (command.authors) {
+            query += ' MATCH (a:Author)-[:CONTRIB_TO]->(p)'
+        }
 
         // Conditionals
         if (command.years || command.start || command.end || command.venues) {
@@ -49,16 +52,33 @@ module.exports = class QueryBuilder extends Filter {
                 query += ` p.paperYear <= ${command.end}`
             }
         }
+        if (command.authors) {
+            query += ` AND toLower(a.authorName) IN [${command.authors.map(a => `'${a.toLowerCase()}'`).join(', ')}]`
+        }
+
         query += ' WITH '
         if (command.venues) {
             query += 'v.venueName AS Venue, '
         }
-        query += 'p.paperYear AS Year, COUNT(p) AS Count RETURN '
-        if (command.groups) {
-            query += command.groups.map(g => capitalize(g.replace(/s$/, ''))).join(', ')
-        } else {
-            query += 'Year'
+        if (command.authors) {
+            query += 'a.authorName AS Author, '
         }
+        query += 'p.paperYear AS Year, COUNT(p) AS Count RETURN '
+
+        let groups = command.groups
+        if (typeof groups === 'undefined') {
+            // Infer groups
+            groups = []
+            if (command.hasOwnProperty('authors')) groups.push('authors')
+            if (command.hasOwnProperty('venues')) groups.push('venues')
+            if (command.hasOwnProperty('years') ||
+                command.hasOwnProperty('start') ||
+                command.hasOwnProperty('end')) {
+
+                groups.push('years')
+            }
+        }
+        query += groups.map(g => capitalize(g.replace(/s$/, ''))).join(', ')
         query += ', Count;'
         return Promise.resolve(query)
     }
