@@ -1,9 +1,12 @@
 const { expect } = require('chai')
 const RequestParser = require('app/components/request-handling/RequestParser')
 
+let parser
+
 describe('RequestParser', () => {
+    beforeEach(() => parser = new RequestParser())
+
     it('should parse `count papers` requests correctly', done => {
-        const parser = new RequestParser()
         const mockRequest = createMockRequest('papers', 'count', {
             years: [2011, 2012, 2013],
             venues: ['arxiv', 'icse'],
@@ -23,7 +26,6 @@ describe('RequestParser', () => {
     })
 
     it('should not include invalid `count papers` request keys', done => {
-        const parser = new RequestParser()
         const mockRequest = createMockRequest('papers', 'count', {
             years: [2011, 2012, 2013],
             foo: 'bar',
@@ -39,7 +41,6 @@ describe('RequestParser', () => {
     })
 
     it('should accept valid `count papers` keys with specific years', done => {
-        const parser = new RequestParser()
         const mockRequest = createMockRequest('papers', 'count', {
             years: [2011, 2012, 2013],
             venues: ['arxiv', 'icse'],
@@ -52,7 +53,6 @@ describe('RequestParser', () => {
     })
 
     it('should accept valid `count papers` keys with range of years', done => {
-        const parser = new RequestParser()
         const mockRequest = createMockRequest('papers', 'count', {
             start: 2011,
             end: 2013,
@@ -65,7 +65,6 @@ describe('RequestParser', () => {
     })
 
     it('should accept `authors` key for a `count papers` query', done => {
-        const parser = new RequestParser()
         const mockRequest = createMockRequest('papers', 'count', {
             years: [2011, 2012, 2013],
             authors: ['Ritsuro Suzuki', 'Kevin Tay']
@@ -77,7 +76,6 @@ describe('RequestParser', () => {
     })
 
     it('should normalize `venues`', done => {
-        const parser = new RequestParser()
         const mockRequest = createMockRequest('papers', 'count', {
             years: [2011, 2012, 2013],
             venues: ['ArXiv', 'ICSE'],
@@ -85,6 +83,23 @@ describe('RequestParser', () => {
         })
         parser.process(mockRequest).then(result => {
             expect(result.venues).to.be.an('array').that.has.all.members(['arxiv', 'icse'])
+            done()
+        }).catch(done)
+    })
+
+    it ('should parse `count citations` requests correctly', done => {
+        const mockRequest = createMockRequest('citations', 'count', {
+            years: [2011, 2012, 2013],
+            venues: ['arxiv', 'icse'],
+            groups: ['venues', 'years']
+        })
+        parser.process(mockRequest).then(result => {
+            expect(result).to.be.an('object').that.is.deep.equal({
+                count: 'citations',
+                years: [2011, 2012, 2013],
+                venues: ['arxiv', 'icse'],
+                groups: ['venues', 'years']
+            })
             done()
         }).catch(done)
     })
