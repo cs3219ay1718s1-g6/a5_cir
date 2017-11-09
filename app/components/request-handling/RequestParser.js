@@ -11,9 +11,9 @@ module.exports = class RequestParser extends Filter {
      */
     process(req) {
         if (req.method === 'GET') {
-            switch (req.params.module) {
-                case 'trend':
-                return this.processTrend(req.query)
+            switch (req.params.action) {
+                case 'count':
+                return this.processCountRequest(req)
 
                 default:
                 // Do nothing
@@ -23,8 +23,8 @@ module.exports = class RequestParser extends Filter {
     }
 
     // Helper methods
-    processTrend(query) {
-        let result = { type: 'TREND' }
+    processCountRequest({ params, query }) {
+        let result = { count: params.module }
         for (let key in query) {
             if (TREND_ALLOWED_KEYS.has(key)) {
                 result[key] = query[key]
