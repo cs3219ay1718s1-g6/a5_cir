@@ -104,6 +104,21 @@ describe('RequestParser', () => {
         }).catch(done)
     })
 
+    it('should parse `top papers` requests correctly', done => {
+        const mockRequest = createMockRequest('papers', 'top', {
+            venue: 'arxiv',
+            limit: 5
+        })
+        parser.process(mockRequest).then(result => {
+            expect(result).to.be.an('object').that.is.deep.equal({
+                top: 'papers',
+                limit: 5,
+                venue: 'arxiv'
+            })
+            done()
+        }).catch(done)
+    })
+
 })
 
 const createMockRequest = (module, action, query) => ({
