@@ -15,11 +15,24 @@ module.exports = class QueryBuilder extends Filter {
     }
 
     constructTrendQuery(command) {
+        // Validate command
+        if (typeof command.years === 'undefined' &&
+            typeof command.start === 'undefined' &&
+            typeof command.end === 'undefined') {
+
+            return Promise.reject(new Error('One of the following params has to be present: year, start, end'))
+        }
+
+        // Match statement
         let query = 'MATCH (p:Paper)'
         if (command.venues) {
             query += '-[:WITHIN]->(v:Venue)'
         }
-        query += ' WHERE'
+
+        // Conditionals
+        if (command.years || command.start || command.end || command.venues) {
+            query += ' WHERE'
+        }
         if (command.venues) {
             query += ` v.venueID IN [${command.venues.map(v => `'${v}'`).join(', ')}] AND`
         }
