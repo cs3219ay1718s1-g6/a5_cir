@@ -1,9 +1,12 @@
 const { expect } = require('chai')
 const QueryBuilder = require('app/components/request-handling/QueryBuilder')
 
+let builder
+
 describe('QueryBuilder', () => {
-    it('should build `trend` queries with years correctly', done => {
-        const builder = new QueryBuilder()
+    beforeEach(() => builder = new QueryBuilder())
+
+    it('should build `count papers` queries with years correctly', done => {
         builder.process({
             count: 'papers',
             years: [2011, 2012, 2013]
@@ -16,8 +19,7 @@ describe('QueryBuilder', () => {
         }).catch(done)
     })
 
-    it('should build `trend` queries with start and end correctly', done => {
-        const builder = new QueryBuilder()
+    it('should build `count papers` queries with start and end correctly', done => {
         builder.process({
             count: 'papers',
             start: 2011,
@@ -31,8 +33,7 @@ describe('QueryBuilder', () => {
         }).catch(done)
     })
 
-    it('should build `trend` queries of specific years with venues correctly', done => {
-        const builder = new QueryBuilder()
+    it('should build `count papers` queries of specific years with venues correctly', done => {
         builder.process({
             count: 'papers',
             years: [2011, 2012, 2013],
@@ -49,8 +50,7 @@ describe('QueryBuilder', () => {
         }).catch(done)
     })
 
-    it('should build `trend` queries of year start and end with venues correctly', done => {
-        const builder = new QueryBuilder()
+    it('should build `count papers` queries of year start and end with venues correctly', done => {
         builder.process({
             count: 'papers',
             start: 2011,
@@ -69,8 +69,7 @@ describe('QueryBuilder', () => {
         }).catch(done)
     })
 
-    it('should build `trend` queries with the correct group order', done => {
-        const builder = new QueryBuilder()
+    it('should build `count papers` queries with the correct group order', done => {
         builder.process({
             count: 'papers',
             years: [2004, 2005, 2006],
@@ -88,8 +87,7 @@ describe('QueryBuilder', () => {
         }).catch(done)
     })
 
-    it('should build `trend` queries with authors correctly', done => {
-        const builder = new QueryBuilder()
+    it('should build `count papers` queries with authors correctly', done => {
         builder.process({
             count: 'papers',
             years: [2012, 2013, 2014],
@@ -103,6 +101,37 @@ describe('QueryBuilder', () => {
                 `AND toLower(a.authorName) IN ['ritsuro suzuki', 'cheng-cheng guo'] ` +
                 `WITH a.authorName AS Author, p.paperYear AS Year, COUNT(p) AS Count ` +
                 `RETURN Author, Year, Count;`
+            )
+            done()
+        }).catch(done)
+    })
+
+    it('should build simple `count citations` queries correctly', done => {
+        builder.process({
+            count: 'citations',
+            venues: ['arxiv', 'icse']
+        }).then(result => {
+            expect(result).to.be.a('string').that.is.equal(
+                `MATCH (c:Paper)-[:CITES]->(p:Paper)-[:WITHIN]->(v:Venue) ` +
+                `WHERE v.venueID IN ['arxiv', 'icse'] ` +
+                `WITH v.venueName AS Venue, COUNT(c) AS Count ` +
+                `RETURN Venue, Count;`
+            )
+            done()
+        }).catch(done)
+    })
+
+    it('should include years if the `groups` parameter demands it', done => {
+        builder.process({
+            count: 'citations',
+            venues: ['arxiv', 'icse'],
+            groups: ['venues', 'years']
+        }).then(result => {
+            expect(result).to.be.a('string').that.is.equal(
+                `MATCH (c:Paper)-[:CITES]->(p:Paper)-[:WITHIN]->(v:Venue) ` +
+                `WHERE v.venueID IN ['arxiv', 'icse'] ` +
+                `WITH v.venueName AS Venue, p.paperYear AS Year, COUNT(c) AS Count ` +
+                `RETURN Venue, Year, Count;`
             )
             done()
         }).catch(done)
