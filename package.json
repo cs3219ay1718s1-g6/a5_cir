@@ -4,6 +4,7 @@
   "description": "Conference Information Retrieval",
   "main": "server.js",
   "scripts": {
+    "test": "npm run unit && npm run integration",
     "unit": "NODE_PATH=. mocha --recursive --exit ./test/unit",
     "integration": "NODE_PATH=. mocha --recursive --exit ./test/integration",
     "start": "NODE_ENV=production node server.js"
