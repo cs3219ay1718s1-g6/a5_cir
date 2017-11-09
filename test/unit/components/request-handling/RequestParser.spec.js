@@ -73,6 +73,19 @@ describe('RequestParser', () => {
             done()
         })
     })
+
+    it('should normalize `venues`', done => {
+        const parser = new RequestParser()
+        const mockRequest = createTrendRequest({
+            years: [2011, 2012, 2013],
+            venues: ['ArXiv', 'ICSE'],
+            groups: ['venues', 'years']
+        })
+        parser.process(mockRequest).then(result => {
+            expect(result.venues).to.be.an('array').that.has.all.members(['arxiv', 'icse'])
+            done()
+        }).catch(done)
+    })
 })
 
 const createTrendRequest = (query) => ({

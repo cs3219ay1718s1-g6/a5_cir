@@ -13,7 +13,7 @@ describe('QueryBuilder', () => {
                 `WITH p.paperYear AS Year, COUNT(p) AS Count RETURN Year, Count;`
             )
             done()
-        })
+        }).catch(done)
     })
 
     it('should parse `trend` queries with start and end correctly', done => {
@@ -28,7 +28,7 @@ describe('QueryBuilder', () => {
                 `WITH p.paperYear AS Year, COUNT(p) AS Count RETURN Year, Count;`
             )
             done()
-        })
+        }).catch(done)
     })
 
     it('should parse `trend` queries of specific years with venues correctly', done => {
@@ -66,7 +66,7 @@ describe('QueryBuilder', () => {
                 `RETURN Venue, Year, Count;`
             )
             done()
-        })
+        }).catch(done)
     })
 
     it('should parse `trend` queries with the correct group order', done => {
@@ -85,6 +85,7 @@ describe('QueryBuilder', () => {
                 `RETURN Year, Venue, Count;`
             )
             done()
-        })
+        }).catch(done)
     })
+
 })
