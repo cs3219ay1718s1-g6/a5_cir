@@ -44,5 +44,5 @@ describe('Request Handling Pipeline', () => {
             }
             done()
         }).catch(done)
-    }).timeout(10000)
+    })
 })

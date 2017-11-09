@@ -1,45 +1,22 @@
 const { expect } = require('chai')
 const { fail } = require('assert')
-const { connect } = require('app/components/architecture/Filter')
-const {
-    RequestParser,
-    QueryBuilder,
-    Neo4jAdapter,
-    ResponseBuilder
-} = require('app/components/request-handling')
-const neo4j = require('app/components/database/neo4j')
 const express = require('express')
+const router = require('app/router')
 const axios = require('axios')
 
 const port = process.env.PORT || 8081
-let app, session, server
+let app, server
 
 describe('Integration: Pipelining Filters', () => {
     before(() => {
-        session = neo4j().session
-
-        const pipeline = connect([
-            new RequestParser(),
-            new QueryBuilder(),
-            new Neo4jAdapter(session),
-            new ResponseBuilder()
-        ])
         app = express()
+        app.use('/api', router)
         server = app.listen(port, () => {
             console.log('Test server listening on port ' + port)
-        })
-
-        app.get('/api/:module', (req, res) => {
-            pipeline(req).then(result => {
-                res.status(200).send(result)
-            }).catch(error => {
-                res.status(422).send(error)
-            })
         })
     })
 
     after(() => {
-        session.close()
         server.close()
     })
 
