@@ -38,7 +38,7 @@ describe('RequestParser', () => {
         }).catch(done)
     })
 
-    it('should accept valid `trend` keys with specific years', done => {
+    it('should accept valid `count papers` keys with specific years', done => {
         const parser = new RequestParser()
         const mockRequest = createMockRequest('papers', 'count', {
             years: [2011, 2012, 2013],
@@ -51,7 +51,7 @@ describe('RequestParser', () => {
         }).catch(done)
     })
 
-    it('should accept valid `trend` keys with range of years', done => {
+    it('should accept valid `count papers` keys with range of years', done => {
         const parser = new RequestParser()
         const mockRequest = createMockRequest('papers', 'count', {
             start: 2011,
@@ -64,7 +64,7 @@ describe('RequestParser', () => {
         }).catch(done)
     })
 
-    it('should accept `authors` key for a `trend` query', done => {
+    it('should accept `authors` key for a `count papers` query', done => {
         const parser = new RequestParser()
         const mockRequest = createMockRequest('papers', 'count', {
             years: [2011, 2012, 2013],

@@ -7,14 +7,13 @@ const { capitalize } = require('../../utils/StringUtils')
  */
 module.exports = class QueryBuilder extends Filter {
     process(command) {
-        switch (command.type) {
-            case 'TREND':
-            return this.constructTrendQuery(command)
+        if (command.hasOwnProperty('count')) {
+            return this.constructCountQuery(command)
         }
         return Promise.reject(new Error('Unsupported command type'))
     }
 
-    constructTrendQuery(command) {
+    constructCountQuery(command) {
         // Validate command
         if (typeof command.years === 'undefined' &&
             typeof command.start === 'undefined' &&

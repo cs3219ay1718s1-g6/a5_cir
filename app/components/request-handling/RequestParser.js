@@ -19,7 +19,7 @@ module.exports = class RequestParser extends Filter {
                 // Do nothing
             }
         }
-        return Promise.reject(new Error(`Unrecognized module '${req.params.module}'`))
+        return Promise.reject(new Error(`Unrecognized action '${req.params.action}'`))
     }
 
     // Helper methods

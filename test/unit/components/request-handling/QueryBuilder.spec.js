@@ -5,7 +5,7 @@ describe('QueryBuilder', () => {
     it('should build `trend` queries with years correctly', done => {
         const builder = new QueryBuilder()
         builder.process({
-            type: 'TREND',
+            count: 'papers',
             years: [2011, 2012, 2013]
         }).then(result => {
             expect(result).to.be.a('string').that.is.equal(
@@ -19,7 +19,7 @@ describe('QueryBuilder', () => {
     it('should build `trend` queries with start and end correctly', done => {
         const builder = new QueryBuilder()
         builder.process({
-            type: 'TREND',
+            count: 'papers',
             start: 2011,
             end: 2013
         }).then(result => {
@@ -34,7 +34,7 @@ describe('QueryBuilder', () => {
     it('should build `trend` queries of specific years with venues correctly', done => {
         const builder = new QueryBuilder()
         builder.process({
-            type: 'TREND',
+            count: 'papers',
             years: [2011, 2012, 2013],
             venues: ['arxiv', 'icse'],
             groups: ['venues', 'years']
@@ -46,13 +46,13 @@ describe('QueryBuilder', () => {
                 `RETURN Venue, Year, Count;`
             )
             done()
-        })
+        }).catch(done)
     })
 
     it('should build `trend` queries of year start and end with venues correctly', done => {
         const builder = new QueryBuilder()
         builder.process({
-            type: 'TREND',
+            count: 'papers',
             start: 2011,
             end: 2013,
             venues: ['arxiv', 'icse'],
@@ -72,7 +72,7 @@ describe('QueryBuilder', () => {
     it('should build `trend` queries with the correct group order', done => {
         const builder = new QueryBuilder()
         builder.process({
-            type: 'TREND',
+            count: 'papers',
             years: [2004, 2005, 2006],
             venues: ['arxiv', 'icse'],
             groups: ['years', 'venues']
@@ -91,7 +91,7 @@ describe('QueryBuilder', () => {
     it('should build `trend` queries with authors correctly', done => {
         const builder = new QueryBuilder()
         builder.process({
-            type: 'TREND',
+            count: 'papers',
             years: [2012, 2013, 2014],
             authors: ['Ritsuro Suzuki', 'Cheng-Cheng Guo'],
             groups: ['authors', 'years']
