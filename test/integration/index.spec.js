@@ -21,7 +21,7 @@ describe('Integration: Pipelining Filters', () => {
     })
 
     it('should work for simple `trend` request', done => {
-        axios.get(`http://localhost:${port}/api/trend`, {
+        axios.get(`http://localhost:${port}/api/papers/count`, {
             params: {
                 years: [2011, 2012, 2013]
             }
@@ -31,26 +31,10 @@ describe('Integration: Pipelining Filters', () => {
         }).catch(done)
     })
 
-    it('should return an error for missing query', done => {
-        axios.get(`http://localhost:${port}/api/trend`, {
-            params: {}
-        }).then(result => {
-            fail(result.status, 422, 'The request should have failed')
-            done()
-        }).catch(error => {
-            if (error.hasOwnProperty('response')) {
-                expect(error.response.status).to.equal(422)
-                done()
-            } else {
-                done(error)
-            }
-        }).catch(done)
-    })
-
     it('should return correct result hierarchy when `groups` is specified', done => {
         Promise.all([
             // Year comes first
-            axios.get(`http://localhost:${port}/api/trend`, {
+            axios.get(`http://localhost:${port}/api/papers/count`, {
                 params: {
                     years: [2011, 2012, 2013],
                     venues: ['arxiv', 'icse'],
@@ -63,7 +47,7 @@ describe('Integration: Pipelining Filters', () => {
             }),
 
             // Venue comes first
-            axios.get(`http://localhost:${port}/api/trend`, {
+            axios.get(`http://localhost:${port}/api/papers/count`, {
                 params: {
                     years: [2011, 2012, 2013],
                     venues: ['arxiv', 'icse'],
