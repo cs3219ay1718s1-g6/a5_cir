@@ -1,5 +1,6 @@
 const Filter = require('../architecture/Filter')
 const LabeledTreeNode = require('../data-structures/LabeledTreeNode')
+const { Integer } = require('neo4j-driver').v1
 
 module.exports = class ResponseBuilder extends Filter {
     process(queryResult) {

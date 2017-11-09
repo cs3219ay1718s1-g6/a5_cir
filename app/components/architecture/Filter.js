@@ -1,12 +1,9 @@
-const { List } = require('immutable')
-
 module.exports = class Filter {
 
     constructor() {
         if (this.constructor === Filter) {
             throw new Error('Cannot instantiate abstract class')
         }
-        this._pipes = []
     }
 
     /**
@@ -19,19 +16,19 @@ module.exports = class Filter {
         throw new Error('Unimplemented')
     }
 
-    /**
-     * Add a pipe which will receive output data from this filter.
-     * @param {Pipe} pipe 
-     */
-    addPipe(pipe) {
-        this._pipes.push(pipe)
-    }
-
-    /**
-     * Get an immutable List of the filter's pipes.
-     * @return {List} - an immutable List containing the pipes
-     */
-    get pipes () {
-        return new List(this._pipes)
+    static connect (filters) {
+        return (input) => {
+            if (typeof filters === 'undefined') {
+                throw new Error('Filters are required')
+            }
+            if (filters.constructor !== Array) {
+                throw new Error('Filters have to be an array')
+            }
+            let currentPromise = filters[0].process(input)
+            for (let index = 1; index < filters.length; ++index) {
+                currentPromise = currentPromise.then(output => filters[index].process(output))
+            }
+            return currentPromise
+        }
     }
 }

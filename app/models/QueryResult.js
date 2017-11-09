@@ -1,7 +1,12 @@
 module.exports = class QueryResult {
     constructor(columns, data) {
         this._columns = columns
-        this._data = data
+        this._data = data.map(row => row.map(value => {
+            if (value instanceof Object && value.toNumber) {
+                value = value.toNumber()
+            }
+            return value
+        }))
     }
 
     get columns () { return this._columns }

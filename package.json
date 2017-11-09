@@ -4,7 +4,8 @@
   "description": "Conference Information Retrieval",
   "main": "server.js",
   "scripts": {
-    "test": "NODE_PATH=. mocha test/**/*.spec.js",
+    "unit": "NODE_PATH=. mocha --recursive --exit ./test/unit",
+    "integration": "NODE_PATH=. mocha --recursive --exit ./test/integration",
     "start": "NODE_ENV=production node server.js"
   },
   "keywords": [
@@ -19,6 +20,7 @@
     "neo4j-driver": "^1.5.0"
   },
   "devDependencies": {
+    "axios": "^0.17.0",
     "chai": "^4.1.2",
     "mocha": "^4.0.1",
     "sinon": "^4.1.1",
