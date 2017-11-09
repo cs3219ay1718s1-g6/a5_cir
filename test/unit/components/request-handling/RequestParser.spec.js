@@ -25,7 +25,7 @@ describe('RequestParser', () => {
         parser.process(mockRequest).then(result => {
             expect(result).to.deep.equal(expected)
             done()
-        })
+        }).catch(done)
     })
 
     it('should not include invalid `trend` request keys', done => {
@@ -45,7 +45,7 @@ describe('RequestParser', () => {
             expect(result).to.be.an('object').that.not.includes.all.keys('foo', 'baz')
             expect(result.groups).to.be.an('array').that.not.includes.members(['foo', 'baz'])
             done()
-        })
+        }).catch(done)
     })
 
     it('should accept valid `trend` keys with specific years', done => {
@@ -58,7 +58,7 @@ describe('RequestParser', () => {
         parser.process(mockRequest).then(result => {
             expect(result).to.be.an('object').that.includes.all.keys('years', 'venues', 'groups')
             done()
-        })
+        }).catch(done)
     })
 
     it('should accept valid `trend` keys with range of years', done => {
@@ -71,7 +71,19 @@ describe('RequestParser', () => {
         parser.process(mockRequest).then(result => {
             expect(result).to.be.an('object').that.includes.all.keys('start', 'end', 'groups')
             done()
+        }).catch(done)
+    })
+
+    it('should accept `authors` key for a `trend` query', done => {
+        const parser = new RequestParser()
+        const mockRequest = createTrendRequest({
+            years: [2011, 2012, 2013],
+            authors: ['Ritsuro Suzuki', 'Kevin Tay']
         })
+        parser.process(mockRequest).then(result => {
+            expect(result).to.be.an('object').that.includes.all.keys('years', 'authors')
+            done()
+        }).catch(done)
     })
 
     it('should normalize `venues`', done => {
@@ -86,6 +98,23 @@ describe('RequestParser', () => {
             done()
         }).catch(done)
     })
+
+    it('should strip `authors`', done => {
+        const parser = new RequestParser()
+        const mockRequest = createTrendRequest({
+            years: [2011, 2012, 2013],
+            authors: ['Ritsuro Suzuki', 'Kevin Tay', 'Cheng-Cheng Guo']
+        })
+        parser.process(mockRequest).then(result => {
+            expect(result.authors).to.be.an('array').that.has.all.members([
+                'ritsuro suzuki',
+                'kevin tay',
+                'chengcheng guo'
+            ])
+            done()
+        }).catch(done)
+    })
+
 })
 
 const createTrendRequest = (query) => ({

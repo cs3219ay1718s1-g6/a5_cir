@@ -8,5 +8,11 @@ module.exports = {
             .replace(/\s+/g, '_')
             .replace(/[^\w]+/g, '')
             .replace(/_{2,}/g, '_')
+    },
+
+    strip (string) {
+        return string.trim()
+            .toLowerCase()
+            .replace(/[^a-z\s]/g, '')
     }
 }

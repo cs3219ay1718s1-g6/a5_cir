@@ -1,8 +1,8 @@
 const Filter = require('../architecture/Filter')
-const { normalize } = require('../../utils/StringUtils')
+const { normalize, strip } = require('../../utils/StringUtils')
 
 // Constants
-const TREND_ALLOWED_KEYS = new Set(['years', 'start', 'end', 'venues'])
+const TREND_ALLOWED_KEYS = new Set(['years', 'start', 'end', 'venues', 'authors'])
 
 module.exports = class RequestParser extends Filter {
     /**
@@ -31,6 +31,9 @@ module.exports = class RequestParser extends Filter {
 
                 if (key === 'venues') {
                     result[key] = result[key].map(v => normalize(v))
+                }
+                if (key === 'authors') {
+                    result[key] = result[key].map(v => strip(v))
                 }
 
             } else if (key === 'groups') {
