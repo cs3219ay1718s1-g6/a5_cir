@@ -5,8 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "npm run unit && npm run integration",
-    "unit": "NODE_PATH=. mocha --recursive --exit ./test/unit",
-    "integration": "NODE_PATH=. mocha --recursive --exit ./test/integration",
+    "unit": "NODE_PATH=. mocha --recursive --exit ./test/unit --timeout 7500",
+    "integration": "NODE_PATH=. mocha --recursive --exit ./test/integration --timeout 7500",
     "start": "NODE_ENV=production node server.js"
   },
   "keywords": [
