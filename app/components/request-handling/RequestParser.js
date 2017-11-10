@@ -51,6 +51,10 @@ module.exports = class RequestParser extends Filter {
         for (let key in query) {
             if (TOP_ALLOWED_KEYS.has(key)) {
                 result[key] = query[key]
+
+                if (key === 'venue') {
+                    result[key] = result[key].toLowerCase()
+                }
             }
         }
         return Promise.resolve(result)

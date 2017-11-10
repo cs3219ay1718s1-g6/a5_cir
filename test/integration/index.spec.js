@@ -20,7 +20,7 @@ describe('Integration: Pipelining Filters', () => {
         server.close()
     })
 
-    it('should work for simple `trend` request', done => {
+    it('should work for simple `count papers` request', done => {
         axios.get(`http://localhost:${port}/api/papers/count`, {
             params: {
                 years: [2011, 2012, 2013]
@@ -37,7 +37,7 @@ describe('Integration: Pipelining Filters', () => {
             axios.get(`http://localhost:${port}/api/papers/count`, {
                 params: {
                     years: [2011, 2012, 2013],
-                    venues: ['arxiv', 'icse'],
+                    venues: ['ArXiv', 'ICSE'],
                     groups: ['years', 'venues']
                 }
             }).then(result => {
@@ -62,5 +62,23 @@ describe('Integration: Pipelining Filters', () => {
 
         ]).then(() => done())
         .catch(done)
+    })
+
+    it('should work for simple `top papers` requests', done => {
+        axios.get(`http://localhost:${port}/api/papers/top`, {
+            params: {
+                venue: 'ArXiv',
+                limit: 10
+            }
+        }).then(({ data }) => {
+            expect(data).to.be.an('object')
+            expect(Object.keys(data)).to.have.lengthOf(1)
+            let venue = Object.keys(data)[0]
+            expect(venue.toLowerCase()).to.equal('arxiv')
+            for (let key in data[venue]) {
+                expect(data[venue][key]).to.be.a('number')
+            }
+            done()
+        }).catch(done)
     })
 })

@@ -106,7 +106,7 @@ describe('RequestParser', () => {
 
     it('should parse `top papers` requests correctly', done => {
         const mockRequest = createMockRequest('papers', 'top', {
-            venue: 'arxiv',
+            venue: 'ArXiv',
             limit: 5
         })
         parser.process(mockRequest).then(result => {
