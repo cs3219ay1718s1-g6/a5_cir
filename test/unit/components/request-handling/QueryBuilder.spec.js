@@ -136,4 +136,19 @@ describe('QueryBuilder', () => {
             done()
         }).catch(done)
     })
+
+    it('should build simple `top` queries correctly', done => {
+        builder.process({
+            top: 'papers',
+            venue: 'arxiv',
+            limit: 10
+        }).then(result => {
+            expect(result).to.be.a('string').that.is.equal(
+                `MATCH (c:Paper)-[:CITES]->(p:Paper)-[:WITHIN]->(v:Venue) ` +
+                `WHERE v.venueID = 'arxiv' WITH v.venueName AS Venue, p.paperTitle AS Paper, COUNT(c) AS Count ` +
+                `ORDER BY Count DESC RETURN Venue, Paper, Count LIMIT 10;`
+            )
+            done()
+        }).catch(done)
+    })
 })

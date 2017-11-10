@@ -10,6 +10,8 @@ module.exports = class QueryBuilder extends Filter {
     process(command) {
         if (command.hasOwnProperty('count')) {
             return this.constructCountQuery(command)
+        } else if (command.hasOwnProperty('top')) {
+            return this.constructTopQuery(command)
         }
         return Promise.reject(new Error('Unsupported command type'))
     }
@@ -87,6 +89,35 @@ module.exports = class QueryBuilder extends Filter {
         }
         query.addReturn(groups.map(g => capitalize(g.replace(/s$/, ''))))
         query.addReturn('Count')
+        return Promise.resolve(query.generate())
+    }
+
+    constructTopQuery(command) {
+        let query = new Neo4jQuery()
+        let primarySelector = '(c:Paper)-[:CITES]->(p:Paper)'
+
+        if (command.venue) {
+            primarySelector += '-[:WITHIN]->(v:Venue)'
+        }
+        query.addSelector(primarySelector)
+        // if (command.author) {
+        //     query.addSelector('(a:Author)-[:CONTRIB_TO]->(p)')
+        // }
+
+        if (command.venue) {
+            query.addCondition(`v.venueID = '${command.venue}'`)
+            query.addAlias('v.venueName', 'Venue')
+            query.addReturn('Venue')
+        }
+        query.addAlias('p.paperTitle', 'Paper')
+        query.addReturn('Paper')
+        query.addAlias('COUNT(c)', 'Count')
+        query.addReturn('Count')
+        query.orderBy('Count')
+        query.limit = command.limit
+        // if (command.author) {
+        //     query.addCondition(`toLower(a.authorName) = '${command.author}'`)
+        // }
         return Promise.resolve(query.generate())
     }
 }
