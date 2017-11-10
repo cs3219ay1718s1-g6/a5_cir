@@ -94,24 +94,38 @@ module.exports = class QueryBuilder extends Filter {
 
     constructTopQuery(command) {
         let query = new Neo4jQuery()
-        let primarySelector = '(c:Paper)-[:CITES]->(p:Paper)'
+        let primarySelector = '(p:Paper)'
 
+        if (command.top === 'papers') {
+            primarySelector = '(c:Paper)-[:CITES]->' + primarySelector
+        }
         if (command.venue) {
             primarySelector += '-[:WITHIN]->(v:Venue)'
         }
         query.addSelector(primarySelector)
-        // if (command.author) {
-        //     query.addSelector('(a:Author)-[:CONTRIB_TO]->(p)')
-        // }
+        if (command.author || command.top === 'authors') {
+            query.addSelector('(a:Author)-[:CONTRIB_TO]->(p)')
+        }
 
         if (command.venue) {
             query.addCondition(`v.venueID = '${command.venue}'`)
             query.addAlias('v.venueName', 'Venue')
             query.addReturn('Venue')
         }
-        query.addAlias('p.paperTitle', 'Paper')
-        query.addReturn('Paper')
-        query.addAlias('COUNT(c)', 'Count')
+
+        if (command.author || command.top === 'authors') {
+            query.addAlias('a.authorName', 'Author')
+            query.addReturn('Author')
+        }
+
+        if (command.top === 'papers') {
+            query.addAlias('p.paperTitle', 'Paper')
+            query.addReturn('Paper')
+            query.addAlias('COUNT(c)', 'Count')
+        } else {
+            query.addAlias('COUNT(p)', 'Count')
+        }
+
         query.addReturn('Count')
         query.orderBy('Count')
         query.limit = command.limit

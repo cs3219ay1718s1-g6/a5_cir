@@ -151,4 +151,20 @@ describe('QueryBuilder', () => {
             done()
         }).catch(done)
     })
+
+    it('should build simple `top` authors correctly', done => {
+        builder.process({
+            top: 'authors',
+            venue: 'arxiv',
+            limit: 5
+        }).then(result => {
+            expect(result).to.be.a('string').that.is.equal(
+                `MATCH (p:Paper)-[:WITHIN]->(v:Venue) ` +
+                `MATCH (a:Author)-[:CONTRIB_TO]->(p) ` +
+                `WHERE v.venueID = 'arxiv' WITH v.venueName AS Venue, a.authorName AS Author, COUNT(p) AS Count ` +
+                `ORDER BY Count DESC RETURN Venue, Author, Count LIMIT 5;`
+            )
+            done()
+        }).catch(done)
+    })
 })
