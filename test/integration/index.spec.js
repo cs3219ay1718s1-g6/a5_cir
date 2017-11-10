@@ -4,7 +4,7 @@ const express = require('express')
 const router = require('app/router')
 const axios = require('axios')
 
-const port = process.env.PORT || 8081
+const port = process.env.TEST_PORT || 8081
 let app, server
 
 describe('Integration: Pipelining Filters', () => {
