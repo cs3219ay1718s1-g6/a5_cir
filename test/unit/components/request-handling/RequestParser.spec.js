@@ -1,4 +1,5 @@
 const { expect } = require('chai')
+const { fail } = require('assert')
 const RequestParser = require('app/components/request-handling/RequestParser')
 
 let parser
@@ -117,6 +118,20 @@ describe('RequestParser', () => {
             })
             done()
         }).catch(done)
+    })
+    
+    it('should require `limit` to be specified for `top` queries', done => {
+        parser.process(createMockRequest('papers', 'top', {
+            venue: 'arxiv',
+        })).then(result => {
+            fail(null, null, 'Parsing should have failed')
+        }).catch(error => {
+            if (error.message === 'Parsing should have failed') {
+                done(error)
+            } else {
+                done()
+            }
+        })
     })
 
 })

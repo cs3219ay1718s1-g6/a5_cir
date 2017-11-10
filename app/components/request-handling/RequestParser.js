@@ -47,6 +47,10 @@ module.exports = class RequestParser extends Filter {
     }
 
     processTopRequest({ params, query }) {
+        if (!query.hasOwnProperty('limit')) {
+            return Promise.reject(new Error('Limit has to be specified'))
+        }
+        
         let result = { top: params.module }
         for (let key in query) {
             if (TOP_ALLOWED_KEYS.has(key)) {
