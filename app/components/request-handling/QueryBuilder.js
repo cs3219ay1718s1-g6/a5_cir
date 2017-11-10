@@ -96,7 +96,7 @@ module.exports = class QueryBuilder extends Filter {
         let query = new Neo4jQuery()
         let primarySelector = '(p:Paper)'
 
-        if (command.top === 'papers') {
+        if (command.top === 'papers' || command.context === 'citations') {
             primarySelector = '(c:Paper)-[:CITES]->' + primarySelector
         }
         if (command.venue) {
@@ -121,6 +121,9 @@ module.exports = class QueryBuilder extends Filter {
         if (command.top === 'papers') {
             query.addAlias('p.paperTitle', 'Paper')
             query.addReturn('Paper')
+        }
+
+        if (command.top === 'papers' || command.context === 'citations') {
             query.addAlias('COUNT(c)', 'Count')
         } else {
             query.addAlias('COUNT(p)', 'Count')

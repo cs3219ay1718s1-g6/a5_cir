@@ -134,6 +134,18 @@ describe('RequestParser', () => {
         })
     })
 
+    it('should allow `context` within `top` queries', done => {
+        const mockRequest = createMockRequest('authors', 'top', {
+            venue: 'arxiv',
+            limit: 5,
+            context: 'citations'
+        })
+        parser.process(mockRequest).then(result => {
+            expect(result).to.be.an('object').that.includes.key('context')
+            done()
+        }).catch(done)
+    })
+
 })
 
 const createMockRequest = (module, action, query) => ({
