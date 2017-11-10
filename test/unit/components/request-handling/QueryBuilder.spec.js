@@ -202,4 +202,21 @@ describe('QueryBuilder', () => {
         }).catch(done)
 
     })
+
+    it('should build `top papers` queries by `author` correctly', done => {
+        builder.process({
+            top: 'papers',
+            author: 'Howard J. Karloff',
+            limit: 3
+        }).then(result => {
+            expect(result).to.be.a('string').that.is.equal(
+                `MATCH (c:Paper)-[:CITES]->(p:Paper) ` +
+                `MATCH (a:Author)-[:CONTRIB_TO]->(p) ` +
+                `WHERE toLower(a.authorName) = 'howard j. karloff' ` +
+                `WITH a.authorName AS Author, p.paperTitle AS Paper, COUNT(c) AS Count ` +
+                `ORDER BY Count DESC RETURN Author, Paper, Count LIMIT 3;`
+            )
+            done()
+        }).catch(done)
+    })
 })
