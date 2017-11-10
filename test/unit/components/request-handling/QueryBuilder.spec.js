@@ -184,4 +184,22 @@ describe('QueryBuilder', () => {
             done()
         }).catch(done)
     })
+
+    it('should build `top papers` queries with `venue` and `year` combined correctly', done => {
+        builder.process({
+            top: 'papers',
+            venue: 'arxiv',
+            year: 2015,
+            limit: 5
+        }).then(result => {
+            expect(result).to.be.a('string').that.is.equal(
+                `MATCH (c:Paper)-[:CITES]->(p:Paper)-[:WITHIN]->(v:Venue) ` +
+                `WHERE v.venueID = 'arxiv' AND p.paperYear = 2015 ` + 
+                `WITH v.venueName AS Venue, p.paperYear AS Year, p.paperTitle AS Paper, COUNT(c) AS Count ` +
+                `ORDER BY Count DESC RETURN Venue, Year, Paper, Count LIMIT 5;`
+            )
+            done()
+        }).catch(done)
+
+    })
 })

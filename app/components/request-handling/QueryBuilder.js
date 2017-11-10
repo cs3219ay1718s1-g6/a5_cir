@@ -112,6 +112,11 @@ module.exports = class QueryBuilder extends Filter {
             query.addAlias('v.venueName', 'Venue')
             query.addReturn('Venue')
         }
+        if (command.year) {
+            query.addCondition(`p.paperYear = ${command.year}`)
+            query.addAlias('p.paperYear', 'Year')
+            query.addReturn('Year')
+        }
 
         if (command.author || command.top === 'authors') {
             query.addAlias('a.authorName', 'Author')
