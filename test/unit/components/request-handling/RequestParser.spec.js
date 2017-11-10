@@ -1,4 +1,5 @@
 const { expect } = require('chai')
+const { fail } = require('assert')
 const RequestParser = require('app/components/request-handling/RequestParser')
 
 let parser
@@ -100,6 +101,47 @@ describe('RequestParser', () => {
                 venues: ['arxiv', 'icse'],
                 groups: ['venues', 'years']
             })
+            done()
+        }).catch(done)
+    })
+
+    it('should parse `top papers` requests correctly', done => {
+        const mockRequest = createMockRequest('papers', 'top', {
+            venue: 'ArXiv',
+            limit: 5
+        })
+        parser.process(mockRequest).then(result => {
+            expect(result).to.be.an('object').that.is.deep.equal({
+                top: 'papers',
+                limit: 5,
+                venue: 'arxiv'
+            })
+            done()
+        }).catch(done)
+    })
+    
+    it('should require `limit` to be specified for `top` queries', done => {
+        parser.process(createMockRequest('papers', 'top', {
+            venue: 'arxiv',
+        })).then(result => {
+            fail(null, null, 'Parsing should have failed')
+        }).catch(error => {
+            if (error.message === 'Parsing should have failed') {
+                done(error)
+            } else {
+                done()
+            }
+        })
+    })
+
+    it('should allow `context` within `top` queries', done => {
+        const mockRequest = createMockRequest('authors', 'top', {
+            venue: 'arxiv',
+            limit: 5,
+            context: 'citations'
+        })
+        parser.process(mockRequest).then(result => {
+            expect(result).to.be.an('object').that.includes.key('context')
             done()
         }).catch(done)
     })
