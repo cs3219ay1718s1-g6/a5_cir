@@ -31,7 +31,8 @@ describe('Request Handling Pipeline', () => {
         const mockRequest = {
             method: 'GET',
             params: {
-                module: 'trend'
+                module: 'papers',
+                action: 'count'
             },
             query: {
                 years: [2011, 2012, 2013]

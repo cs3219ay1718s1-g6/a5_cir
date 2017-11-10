@@ -20,8 +20,8 @@ describe('Integration: Pipelining Filters', () => {
         server.close()
     })
 
-    it('should work for simple `trend` request', done => {
-        axios.get(`http://localhost:${port}/api/trend`, {
+    it('should work for simple `count papers` request', done => {
+        axios.get(`http://localhost:${port}/api/papers/count`, {
             params: {
                 years: [2011, 2012, 2013]
             }
@@ -31,29 +31,13 @@ describe('Integration: Pipelining Filters', () => {
         }).catch(done)
     })
 
-    it('should return an error for missing query', done => {
-        axios.get(`http://localhost:${port}/api/trend`, {
-            params: {}
-        }).then(result => {
-            fail(result.status, 422, 'The request should have failed')
-            done()
-        }).catch(error => {
-            if (error.hasOwnProperty('response')) {
-                expect(error.response.status).to.equal(422)
-                done()
-            } else {
-                done(error)
-            }
-        }).catch(done)
-    })
-
     it('should return correct result hierarchy when `groups` is specified', done => {
         Promise.all([
             // Year comes first
-            axios.get(`http://localhost:${port}/api/trend`, {
+            axios.get(`http://localhost:${port}/api/papers/count`, {
                 params: {
                     years: [2011, 2012, 2013],
-                    venues: ['arxiv', 'icse'],
+                    venues: ['ArXiv', 'ICSE'],
                     groups: ['years', 'venues']
                 }
             }).then(result => {
@@ -63,7 +47,7 @@ describe('Integration: Pipelining Filters', () => {
             }),
 
             // Venue comes first
-            axios.get(`http://localhost:${port}/api/trend`, {
+            axios.get(`http://localhost:${port}/api/papers/count`, {
                 params: {
                     years: [2011, 2012, 2013],
                     venues: ['arxiv', 'icse'],
@@ -78,5 +62,23 @@ describe('Integration: Pipelining Filters', () => {
 
         ]).then(() => done())
         .catch(done)
+    })
+
+    it('should work for simple `top papers` requests', done => {
+        axios.get(`http://localhost:${port}/api/papers/top`, {
+            params: {
+                venue: 'ArXiv',
+                limit: 10
+            }
+        }).then(({ data }) => {
+            expect(data).to.be.an('object')
+            expect(Object.keys(data)).to.have.lengthOf(1)
+            let venue = Object.keys(data)[0]
+            expect(venue.toLowerCase()).to.equal('arxiv')
+            for (let key in data[venue]) {
+                expect(data[venue][key]).to.be.a('number')
+            }
+            done()
+        }).catch(done)
     })
 })

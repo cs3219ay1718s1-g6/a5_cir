@@ -17,7 +17,7 @@ const pipeline = connect([
     new ResponseBuilder
 ])
 
-router.get('/:module', (req, res) => {
+router.get('/:module/:action', (req, res) => {
     pipeline(req).then(result => {
         res.status(200).send(result)
     }).catch(error => {

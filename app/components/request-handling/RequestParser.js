@@ -1,7 +1,9 @@
 const Filter = require('../architecture/Filter')
+const { normalize } = require('../../utils/StringUtils')
 
 // Constants
-const TREND_ALLOWED_KEYS = new Set(['years', 'start', 'end', 'venues'])
+const COUNT_ALLOWED_KEYS = new Set(['years', 'start', 'end', 'venues', 'authors'])
+const TOP_ALLOWED_KEYS = new Set(['year', 'venue', 'author', 'limit', 'context'])
 
 module.exports = class RequestParser extends Filter {
     /**
@@ -10,28 +12,55 @@ module.exports = class RequestParser extends Filter {
      */
     process(req) {
         if (req.method === 'GET') {
-            switch (req.params.module) {
-                case 'trend':
-                return this.processTrend(req.query)
+            switch (req.params.action) {
+                case 'count':
+                return this.processCountRequest(req)
+
+                case 'top':
+                return this.processTopRequest(req)
 
                 default:
                 // Do nothing
             }
         }
-        return Promise.reject(new Error(`Unrecognized module '${req.params.module}'`))
+        return Promise.reject(new Error(`Unrecognized action '${req.params.action}'`))
     }
 
     // Helper methods
-    processTrend(query) {
-        let result = { type: 'TREND' }
+    processCountRequest({ params, query }) {
+        let result = { count: params.module }
         for (let key in query) {
-            if (TREND_ALLOWED_KEYS.has(key)) {
+            if (COUNT_ALLOWED_KEYS.has(key)) {
                 result[key] = query[key]
+
+                if (key === 'venues') {
+                    result[key] = result[key].map(v => normalize(v))
+                }
+
             } else if (key === 'groups') {
-                result[key] = query[key].filter(k => TREND_ALLOWED_KEYS.has(k))
+                result[key] = query[key].filter(k => COUNT_ALLOWED_KEYS.has(k))
+                    .map(v => normalize(v))
             }
         }
 
+        return Promise.resolve(result)
+    }
+
+    processTopRequest({ params, query }) {
+        if (!query.hasOwnProperty('limit')) {
+            return Promise.reject(new Error('Limit has to be specified'))
+        }
+        
+        let result = { top: params.module }
+        for (let key in query) {
+            if (TOP_ALLOWED_KEYS.has(key)) {
+                result[key] = query[key]
+
+                if (key === 'venue') {
+                    result[key] = result[key].toLowerCase()
+                }
+            }
+        }
         return Promise.resolve(result)
     }
 }

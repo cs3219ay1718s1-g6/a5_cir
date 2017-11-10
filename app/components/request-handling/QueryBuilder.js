@@ -1,4 +1,5 @@
 const Filter = require('../architecture/Filter')
+const Neo4jQuery = require('../../models/Neo4jQuery')
 const { capitalize } = require('../../utils/StringUtils')
 
 /**
@@ -7,59 +8,133 @@ const { capitalize } = require('../../utils/StringUtils')
  */
 module.exports = class QueryBuilder extends Filter {
     process(command) {
-        switch (command.type) {
-            case 'TREND':
-            return this.constructTrendQuery(command)
+        if (command.hasOwnProperty('count')) {
+            return this.constructCountQuery(command)
+        } else if (command.hasOwnProperty('top')) {
+            return this.constructTopQuery(command)
         }
         return Promise.reject(new Error('Unsupported command type'))
     }
 
-    constructTrendQuery(command) {
+    constructCountQuery(command) {
         // Validate command
-        if (typeof command.years === 'undefined' &&
-            typeof command.start === 'undefined' &&
-            typeof command.end === 'undefined') {
+        // if (typeof command.years === 'undefined' &&
+        //     typeof command.start === 'undefined' &&
+        //     typeof command.end === 'undefined') {
 
-            return Promise.reject(new Error('One of the following params has to be present: year, start, end'))
-        }
+        //     return Promise.reject(new Error('One of the following params has to be present: year, start, end'))
+        // }
+        let query = new Neo4jQuery()
 
         // Match statement
-        let query = 'MATCH (p:Paper)'
+        let primarySelector = '(p:Paper)'
+        if (command.count === 'citations') {
+            primarySelector = '(c:Paper)-[:CITES]->' + primarySelector
+        }
         if (command.venues) {
-            query += '-[:WITHIN]->(v:Venue)'
+            primarySelector += '-[:WITHIN]->(v:Venue)'
+        }
+        query.addSelector(primarySelector)
+        if (command.authors) {
+            query.addSelector('(a:Author)-[:CONTRIB_TO]->(p)')
         }
 
         // Conditionals
-        if (command.years || command.start || command.end || command.venues) {
-            query += ' WHERE'
-        }
         if (command.venues) {
-            query += ` v.venueID IN [${command.venues.map(v => `'${v}'`).join(', ')}] AND`
+            query.addCondition(`v.venueID IN [${command.venues.map(v => `'${v}'`).join(', ')}]`)
         }
         if (command.years) {
-            query += ` p.paperYear IN [${command.years.join(', ')}]`
+            query.addCondition(`p.paperYear IN [${command.years.join(', ')}]`)
         } else {
             if (command.start) {
-                query += ` p.paperYear >= ${command.start}`
+                query.addCondition(`p.paperYear >= ${command.start}`)
             }
             if (command.end) {
-                if (command.start) {
-                    query += ' AND';
-                }
-                query += ` p.paperYear <= ${command.end}`
+                query.addCondition(`p.paperYear <= ${command.end}`)
             }
         }
-        query += ' WITH '
+        if (command.authors) {
+            query.addCondition(`toLower(a.authorName) IN [${command.authors.map(a => `'${a.toLowerCase()}'`).join(', ')}]`)
+        }
+
         if (command.venues) {
-            query += 'v.venueName AS Venue, '
+            query.addAlias('v.venueName', 'Venue')
         }
-        query += 'p.paperYear AS Year, COUNT(p) AS Count RETURN '
-        if (command.groups) {
-            query += command.groups.map(g => capitalize(g.replace(/s$/, ''))).join(', ')
+        if (command.authors) {
+            query.addAlias('a.authorName', 'Author')
+        }
+
+        const shouldIncludeYears = (
+            ['years', 'start', 'end'].map(k => command.hasOwnProperty(k)).reduce((a, v) => a || v, false) ||
+            (command.hasOwnProperty('groups') && command.groups.indexOf('years') >= 0)
+        )
+        if (shouldIncludeYears) {
+            query.addAlias('p.paperYear', 'Year')
+        }
+        if (command.count === 'citations') {
+            query.addAlias('COUNT(c)', 'Count')
         } else {
-            query += 'Year'
+            query.addAlias('COUNT(p)', 'Count')
         }
-        query += ', Count;'
-        return Promise.resolve(query)
+
+        let groups = command.groups
+        if (typeof groups === 'undefined') {
+            // Infer groups
+            groups = []
+            if (command.hasOwnProperty('authors')) groups.push('authors')
+            if (command.hasOwnProperty('venues')) groups.push('venues')
+            if (shouldIncludeYears) {
+                groups.push('years')
+            }
+        }
+        query.addReturn(groups.map(g => capitalize(g.replace(/s$/, ''))))
+        query.addReturn('Count')
+        return Promise.resolve(query.generate())
+    }
+
+    constructTopQuery(command) {
+        let query = new Neo4jQuery()
+        let primarySelector = '(p:Paper)'
+
+        if (command.top === 'papers' || command.context === 'citations') {
+            primarySelector = '(c:Paper)-[:CITES]->' + primarySelector
+        }
+        if (command.venue) {
+            primarySelector += '-[:WITHIN]->(v:Venue)'
+        }
+        query.addSelector(primarySelector)
+        if (command.author || command.top === 'authors') {
+            query.addSelector('(a:Author)-[:CONTRIB_TO]->(p)')
+        }
+
+        if (command.venue) {
+            query.addCondition(`v.venueID = '${command.venue}'`)
+            query.addAlias('v.venueName', 'Venue')
+            query.addReturn('Venue')
+        }
+
+        if (command.author || command.top === 'authors') {
+            query.addAlias('a.authorName', 'Author')
+            query.addReturn('Author')
+        }
+
+        if (command.top === 'papers') {
+            query.addAlias('p.paperTitle', 'Paper')
+            query.addReturn('Paper')
+        }
+
+        if (command.top === 'papers' || command.context === 'citations') {
+            query.addAlias('COUNT(c)', 'Count')
+        } else {
+            query.addAlias('COUNT(p)', 'Count')
+        }
+
+        query.addReturn('Count')
+        query.orderBy('Count')
+        query.limit = command.limit
+        // if (command.author) {
+        //     query.addCondition(`toLower(a.authorName) = '${command.author}'`)
+        // }
+        return Promise.resolve(query.generate())
     }
 }
