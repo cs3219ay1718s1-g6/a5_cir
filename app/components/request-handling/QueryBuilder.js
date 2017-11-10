@@ -112,6 +112,15 @@ module.exports = class QueryBuilder extends Filter {
             query.addAlias('v.venueName', 'Venue')
             query.addReturn('Venue')
         }
+        if (command.year) {
+            query.addCondition(`p.paperYear = ${command.year}`)
+            query.addAlias('p.paperYear', 'Year')
+            query.addReturn('Year')
+        }
+
+        if (command.author) {
+            query.addCondition(`toLower(a.authorName) = '${command.author.toLowerCase()}'`)
+        }
 
         if (command.author || command.top === 'authors') {
             query.addAlias('a.authorName', 'Author')
@@ -132,9 +141,6 @@ module.exports = class QueryBuilder extends Filter {
         query.addReturn('Count')
         query.orderBy('Count')
         query.limit = command.limit
-        // if (command.author) {
-        //     query.addCondition(`toLower(a.authorName) = '${command.author}'`)
-        // }
         return Promise.resolve(query.generate())
     }
 }

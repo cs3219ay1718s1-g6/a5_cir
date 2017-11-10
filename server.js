@@ -9,6 +9,13 @@ const router = require('./app/router')
 // Initialize server
 const app = express()
 
+// Allow Cross-Origin queries to be made
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*')
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+    next()
+})
+
 // Declare middlewares
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
