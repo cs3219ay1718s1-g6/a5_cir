@@ -12,6 +12,8 @@ module.exports = class QueryBuilder extends Filter {
             return this.constructCountQuery(command)
         } else if (command.hasOwnProperty('top')) {
             return this.constructTopQuery(command)
+        } else if (command.hasOwnProperty('network')) {
+            return this.constructNetworkQuery(command)
         }
         return Promise.reject(new Error('Unsupported command type'))
     }
@@ -141,6 +143,14 @@ module.exports = class QueryBuilder extends Filter {
         query.addReturn('Count')
         query.orderBy('Count')
         query.limit = command.limit
+        return Promise.resolve(query.generate())
+    }
+
+    constructNetworkQuery(command) {
+        let query = new Neo4jQuery()
+        query.addSelector(`r = (:Author)-[:CONTRIB_TO]->(:Paper)-[:CITES*0..${command.length}]->(p:Paper)`)
+        query.addCondition(`toLower(p.paperTitle) = '${command.center.toLowerCase()}'`)
+        query.addReturn('r')
         return Promise.resolve(query.generate())
     }
 }

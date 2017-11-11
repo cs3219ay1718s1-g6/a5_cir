@@ -146,6 +146,21 @@ describe('RequestParser', () => {
         }).catch(done)
     })
 
+    it('should parse `papers network` requests correctly', done => {
+        const mockRequest = createMockRequest('papers', 'network', {
+            center: 'Low-density parity check codes over GF(q)',
+            length: 2
+        })
+        parser.process(mockRequest).then(result => {
+            expect(result).to.be.an('object').that.is.deep.equal({
+                network: 'papers',
+                center: 'low-density parity check codes over gf(q)',
+                length: 2
+            })
+            done()
+        }).catch(done)
+    })
+
 })
 
 const createMockRequest = (module, action, query) => ({
