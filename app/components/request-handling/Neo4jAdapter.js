@@ -1,6 +1,6 @@
 const neo4j = require('../database/neo4j')
 const Filter = require('../architecture/Filter')
-const QueryResult = require('../../models/QueryResult')
+const ResultTable = require('../../models/ResultTable')
 
 module.exports = class Neo4jAdapter extends Filter {
 
@@ -17,14 +17,14 @@ module.exports = class Neo4jAdapter extends Filter {
     process(query) {
         return this._session.run(query).then(result => {
             if (result.records.length === 0) {
-                return QueryResult.empty()
+                return ResultTable.empty()
             }
             let columns = result.records[0].keys
             let data = []
             for (let record of result.records) {
                 data.push(columns.map((_, index) => record.get(index)))
             }
-            return new QueryResult(columns, data)
+            return new ResultTable(columns, data)
         })
     }
 

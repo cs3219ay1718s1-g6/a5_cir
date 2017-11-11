@@ -1,11 +1,11 @@
 const { expect } = require('chai')
 const ResponseBuilder = require('app/components/request-handling/ResponseBuilder')
-const QueryResult = require('app/models/QueryResult')
+const ResultTable = require('app/models/ResultTable')
 
 describe('ResponseBuilder', () => {
     it('should group result according to columns', done => {
         const builder = new ResponseBuilder()
-        builder.process(new QueryResult(
+        builder.process(new ResultTable(
             ['Venue', 'Year', 'Count'],
             [
                 ['ArXiV', 2012, 10],
