@@ -81,4 +81,20 @@ describe('Integration: Pipelining Filters', () => {
             done()
         }).catch(done)
     })
+
+    it('should work for simple `papers network` queries', done => {
+        axios.get(`http://localhost:${port}/api/papers/network`, {
+            params: {
+                center: 'Low-density parity check codes over GF(q)',
+                length: 2
+            }
+        }).then(({ data }) => {
+            expect(data).to.be.an('object').that.includes.all.keys('nodes', 'links')
+            expect(data.nodes).to.be.an('array').that.is.not.empty
+            expect(data.links).to.be.an('array').that.is.not.empty
+            expect(data.nodes[0]).to.be.an('object').that.includes.all.keys('id', 'title', 'year', 'authors')
+            expect(data.links[0]).to.be.an('object').that.includes.all.keys('source', 'target')
+            done()
+        }).catch(done)
+    })
 })

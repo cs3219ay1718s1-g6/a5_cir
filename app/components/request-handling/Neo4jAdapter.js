@@ -76,7 +76,16 @@ module.exports = class Neo4jAdapter extends Filter {
             for (let { start, relationship, end } of path.segments) {
                 [start, end].forEach(node => graph.addNode(
                     node.identity.toNumber(), 
-                    Object.assign({}, { label: node.labels[0] }, node.properties)
+                    ((props) => {
+                        let object = { label: node.labels[0] }
+                        for (let key in props) {
+                            object[key] = props[key]
+                            if (object[key].constructor.name === 'Integer') {
+                                object[key] = object[key].toNumber()
+                            }
+                        }
+                        return object
+                    })(node.properties)
                 ))
                 graph.connect(
                     start.identity.toNumber(),

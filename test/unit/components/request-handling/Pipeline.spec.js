@@ -27,7 +27,7 @@ describe('Request Handling Pipeline', () => {
         session.close()
     })
 
-    it('should process a simple `trend` request correctly', done => {
+    it('should process a simple `count papers` request correctly', done => {
         const mockRequest = {
             method: 'GET',
             params: {
@@ -43,6 +43,38 @@ describe('Request Handling Pipeline', () => {
             for (let key in result) {
                 expect(result[key]).to.be.a('number')
             }
+            done()
+        }).catch(done)
+    })
+
+    it('should process a simple `papers network` request correctly', done => {
+        const mockRequest = {
+            method: 'GET',
+            params: {
+                module: 'papers',
+                action: 'network'
+            },
+            query: {
+                center: 'Low-density parity check codes over GF(q)',
+                length: 2
+            }
+        }
+        pipeline(mockRequest).then(result => {
+            expect(result).to.be.an('object').that.has.all.keys('nodes', 'links')
+            expect(result.nodes).to.be.an('array').that.is.not.empty
+            expect(result.links).to.be.an('array').that.is.not.empty
+            for (let node of result.nodes) {
+                expect(node).to.be.an('object').that.includes.all.keys('id', 'title', 'year', 'authors')
+                expect(node.id).to.be.a('number')
+                expect(node.title).to.be.a('string')
+                expect(node.year).to.be.a('number')
+                expect(node.authors).to.be.an('array')
+            }
+            for (let link of result.links) {
+                expect(link.source).to.be.a('number')
+                expect(link.target).to.be.a('number')
+            }
+
             done()
         }).catch(done)
     })
