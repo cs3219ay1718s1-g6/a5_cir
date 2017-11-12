@@ -219,4 +219,19 @@ describe('QueryBuilder', () => {
             done()
         }).catch(done)
     })
+
+    it('should build a simple `papers network` query correctly', done => {
+        builder.process({
+            network: 'papers',
+            length: 2,
+            center: 'low-density parity check codes over gf(q)'
+        }).then(result => {
+            expect(result).to.be.a('string').that.is.equal(
+                `MATCH r = (:Author)-[:CONTRIB_TO]->(:Paper)-[:CITES*0..2]->(p:Paper) ` +
+                `WHERE toLower(p.paperTitle) = 'low-density parity check codes over gf(q)' ` +
+                `RETURN r;`
+            )
+            done()
+        }).catch(done)
+    })
 })
