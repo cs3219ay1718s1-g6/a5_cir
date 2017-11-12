@@ -1,4 +1,4 @@
-module.exports = class QueryResult {
+module.exports = class ResultTable {
     constructor(columns, data) {
         this._columns = columns
         this._data = data.map(row => row.map(value => {
@@ -23,10 +23,10 @@ module.exports = class QueryResult {
     }
 
     get [Symbol.toStringTag] () {
-        return 'queryResult'
+        return 'resultTable'
     }
 
     static empty () {
-        return new QueryResult([], [])
+        return new ResultTable([], [])
     }
 }

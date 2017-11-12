@@ -1,9 +1,23 @@
 const Filter = require('../architecture/Filter')
 const LabeledTreeNode = require('../data-structures/LabeledTreeNode')
 const { Integer } = require('neo4j-driver').v1
+const ResultGraph = require('../../models/ResultGraph')
 
 module.exports = class ResponseBuilder extends Filter {
     process(queryResult) {
+        switch (queryResult[Symbol.toStringTag]) {
+            case 'resultTable':
+            return this.handleCountResult(queryResult)
+
+            case 'resultGraph':
+            return this.handleNetworkResult(queryResult)
+
+            default:
+            return Promise.reject(new Error('Unrecognized query result format'))
+        }
+    }
+
+    handleCountResult(queryResult) {
         // Build a tree of result
         const root = new LabeledTreeNode(null, 'root')
 
@@ -29,5 +43,34 @@ module.exports = class ResponseBuilder extends Filter {
         }
 
         return Promise.resolve(root.toObject())
+    }
+
+    handleNetworkResult(queryResult) {
+        let graph = new ResultGraph()
+        let authors = {}
+        for (let node of queryResult.nodes) {
+            if (node.label === 'Author') {
+                authors[node.id] = node.authorName
+            } else if (node.label === 'Paper') {
+                graph.addNode(node.id, {
+                    title: node.paperTitle,
+                    year: node.paperYear,
+                    authors: new Set()
+                })
+            }
+        }
+        for (let link of queryResult.links) {
+            if (link.type === 'CONTRIB_TO') {
+                graph.getNode(link.target).authors.add(authors[link.source])
+            } else if (link.type === 'CITES') {
+                graph.connect(link.source, link.target)
+            }
+        }
+        return Promise.resolve({
+            nodes: graph.nodes.map(node => Object.assign({}, node, {
+                authors: [...node.authors.values()]
+            })),
+            links: graph.links
+        })
     }
 }
