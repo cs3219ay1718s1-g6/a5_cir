@@ -57,6 +57,10 @@ module.exports = class ResultGraph {
         }
         return this._cachedLinks
     }
+
+    getNode (nodeId) {
+        return this._nodes[nodeId]
+    }
 }
 
 const parseNodeId = (nodeId) => /^\d+$/.test(nodeId) ? parseInt(nodeId) : nodeId

@@ -41,4 +41,10 @@ describe('ResultGraph', () => {
         graph.addNode(0, { name: 'a' })
         expect(() => graph.connect(0, 1)).to.throw()
     })
+
+    it('should allow querying of a node by its id', () => {
+        let graph = new ResultGraph()
+        graph.addNode(1234, { name: 'b' })
+        expect(graph.getNode(1234)).to.deep.equal({ name: 'b' })
+    })
 })

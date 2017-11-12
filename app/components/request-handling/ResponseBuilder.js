@@ -1,16 +1,15 @@
 const Filter = require('../architecture/Filter')
 const LabeledTreeNode = require('../data-structures/LabeledTreeNode')
 const { Integer } = require('neo4j-driver').v1
-
-const lastElement = (array) => (array.length > 0 ? array[array.length - 1] : null)
+const ResultGraph = require('../../models/ResultGraph')
 
 module.exports = class ResponseBuilder extends Filter {
     process(queryResult) {
-        switch (lastElement(queryResult.columns)) {
-            case 'Count':
+        switch (queryResult[Symbol.toStringTag]) {
+            case 'resultTable':
             return this.handleCountResult(queryResult)
 
-            case 'PaperID':
+            case 'resultGraph':
             return this.handleNetworkResult(queryResult)
 
             default:
@@ -47,44 +46,31 @@ module.exports = class ResponseBuilder extends Filter {
     }
 
     handleNetworkResult(queryResult) {
-        let nodes = {}
-        let links = []
-
-        const createNodeIfNeeded = (id, title) => {
-            if (!nodes.hasOwnProperty(id)) {
-                nodes[id] = { title, authors: new Set() }
-            }
-            return nodes[id]
-        }
-
-        const addAuthor = (paperId, paperTitle, author) => {
-            const paper = createNodeIfNeeded(paperId, paperTitle)
-            paper.authors.add(author)
-        }
-
-        for (let rowIndex in queryResult.data) {
-            let {
-                Author,
-                CitingPaper,
-                CitingID,
-                Paper,
-                PaperID
-            } = queryResult.row(rowIndex)
-            addAuthor(CitingID, CitingPaper, Author)
-            if (CitingID !== PaperID) {
-                links.push({
-                    source: CitingID,
-                    target: PaperID
+        let graph = new ResultGraph()
+        let authors = {}
+        for (let node of queryResult.nodes) {
+            if (node.label === 'Author') {
+                authors[node.id] = node.authorName
+            } else if (node.label === 'Paper') {
+                graph.addNode(node.id, {
+                    title: node.paperTitle,
+                    year: node.paperYear,
+                    authors: new Set()
                 })
             }
         }
-
+        for (let link of queryResult.links) {
+            if (link.type === 'CONTRIB_TO') {
+                graph.getNode(link.target).authors.add(authors[link.source])
+            } else if (link.type === 'CITES') {
+                graph.connect(link.source, link.target)
+            }
+        }
         return Promise.resolve({
-            nodes: Object.keys(nodes).map(id => Object.assign({}, nodes[id], {
-                id,
-                authors: [...nodes[id].authors.values()]
+            nodes: graph.nodes.map(node => Object.assign({}, node, {
+                authors: [...node.authors.values()]
             })),
-            links
+            links: graph.links
         })
     }
 }
