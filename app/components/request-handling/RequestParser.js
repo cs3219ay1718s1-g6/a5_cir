@@ -3,7 +3,7 @@ const { normalize } = require('../../utils/StringUtils')
 
 // Constants
 const COUNT_ALLOWED_KEYS = new Set(['years', 'start', 'end', 'venues', 'authors'])
-const TOP_ALLOWED_KEYS = new Set(['year', 'venue', 'author', 'limit', 'context'])
+const TOP_ALLOWED_KEYS = new Set(['year', 'venue', 'author', 'limit', 'context', 'years', 'venues'])
 const NETWORK_ALLOWED_MODULES = new Set(['papers'])
 
 module.exports = class RequestParser extends Filter {

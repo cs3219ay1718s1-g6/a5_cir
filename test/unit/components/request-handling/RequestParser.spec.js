@@ -161,6 +161,34 @@ describe('RequestParser', () => {
         }).catch(done)
     })
 
+    it('should parse `count phrases` requests correctly', done => {
+        const mockRequest = createMockRequest('phrases', 'count', {
+            venues: ['arxiv', 'icse']
+        })
+        parser.process(mockRequest).then(result => {
+            expect(result).to.be.an('object').that.is.deep.equal({
+                count: 'phrases',
+                venues: ['arxiv', 'icse']
+            })
+            done()
+        }).catch(done)
+    })
+
+    it('should parse `top phrases` requests correctly', done => {
+        const mockRequest = createMockRequest('phrases', 'top', {
+            years: [2012, 2013],
+            limit: 10
+        })
+        parser.process(mockRequest).then(result => {
+            expect(result).to.be.an('object').that.is.deep.equal({
+                top: 'phrases',
+                years: [2012, 2013],
+                limit: 10
+            })
+            done()
+        }).catch(done)
+    })
+
 })
 
 const createMockRequest = (module, action, query) => ({
