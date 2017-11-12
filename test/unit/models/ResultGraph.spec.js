@@ -35,4 +35,10 @@ describe('ResultGraph', () => {
             }
         ])
     })
+
+    it('should not accept connections between non-existent nodes', () => {
+        let graph = new ResultGraph()
+        graph.addNode(0, { name: 'a' })
+        expect(() => graph.connect(0, 1)).to.throw()
+    })
 })
