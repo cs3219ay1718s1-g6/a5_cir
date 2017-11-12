@@ -32,6 +32,8 @@ module.exports = class QueryBuilder extends Filter {
         let primarySelector = '(p:Paper)'
         if (command.count === 'citations') {
             primarySelector = '(c:Paper)-[:CITES]->' + primarySelector
+        } else if (command.count === 'phrases') {
+            primarySelector = '(w:Phrase)<-[:CONTAINS]-' + primarySelector
         }
         if (command.venues) {
             primarySelector += '-[:WITHIN]->(v:Venue)'
@@ -65,6 +67,9 @@ module.exports = class QueryBuilder extends Filter {
         if (command.authors) {
             query.addAlias('a.authorName', 'Author')
         }
+        if (command.count === 'phrases') {
+            query.addAlias('w.phraseValue', 'Phrase')
+        }
 
         const shouldIncludeYears = (
             ['years', 'start', 'end'].map(k => command.hasOwnProperty(k)).reduce((a, v) => a || v, false) ||
@@ -89,6 +94,7 @@ module.exports = class QueryBuilder extends Filter {
             groups = []
             if (command.hasOwnProperty('authors')) groups.push('authors')
             if (command.hasOwnProperty('venues')) groups.push('venues')
+            if (command.count === 'phrases') groups.push('phrases')
             if (shouldIncludeYears) {
                 groups.push('years')
             }
@@ -104,8 +110,10 @@ module.exports = class QueryBuilder extends Filter {
 
         if (command.top === 'papers' || command.context === 'citations') {
             primarySelector = '(c:Paper)-[:CITES]->' + primarySelector
+        } else if (command.top === 'phrases') {
+            primarySelector = '(w:Phrase)<-[:CONTAINS]-' + primarySelector
         }
-        if (command.venue) {
+        if (command.venue || command.venues) {
             primarySelector += '-[:WITHIN]->(v:Venue)'
         }
         query.addSelector(primarySelector)
@@ -113,13 +121,21 @@ module.exports = class QueryBuilder extends Filter {
             query.addSelector('(a:Author)-[:CONTRIB_TO]->(p)')
         }
 
-        if (command.venue) {
-            query.addCondition(`v.venueID = '${command.venue}'`)
+        if (command.venue || command.venues) {
+            if (command.venues) {
+                query.addCondition(`v.venueID IN ['${command.venues.map(v => `'${v}'`).join(', ')}']`)
+            } else {
+                query.addCondition(`v.venueID = '${command.venue}'`)
+            }
             query.addAlias('v.venueName', 'Venue')
             query.addReturn('Venue')
         }
-        if (command.year) {
-            query.addCondition(`p.paperYear = ${command.year}`)
+        if (command.year || command.years) {
+            if (command.years) {
+                query.addCondition(`p.paperYear IN [${command.years.join(', ')}]`)
+            } else {
+                query.addCondition(`p.paperYear = ${command.year}`)
+            }
             query.addAlias('p.paperYear', 'Year')
             query.addReturn('Year')
         }
@@ -136,6 +152,11 @@ module.exports = class QueryBuilder extends Filter {
         if (command.top === 'papers') {
             query.addAlias('p.paperTitle', 'Paper')
             query.addReturn('Paper')
+        }
+
+        if (command.top === 'phrases') {
+            query.addAlias('w.phraseValue', 'Phrase')
+            query.addReturn('Phrase')
         }
 
         if (command.top === 'papers' || command.context === 'citations') {
