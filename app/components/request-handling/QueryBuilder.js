@@ -37,7 +37,7 @@ module.exports = class QueryBuilder extends Filter {
             primarySelector += '-[:WITHIN]->(v:Venue)'
         }
         query.addSelector(primarySelector)
-        if (command.authors) {
+        if (command.authors || command.count === 'authors') {
             query.addSelector('(a:Author)-[:CONTRIB_TO]->(p)')
         }
 
@@ -73,11 +73,15 @@ module.exports = class QueryBuilder extends Filter {
         if (shouldIncludeYears) {
             query.addAlias('p.paperYear', 'Year')
         }
-        if (command.count === 'citations') {
-            query.addAlias('COUNT(c)', 'Count')
-        } else {
-            query.addAlias('COUNT(p)', 'Count')
+
+        // Find out what variable is being counted
+        let countedVariable
+        switch (command.count) {
+            case 'citations': countedVariable = 'c'; break
+            case 'authors':   countedVariable = 'a'; break
+            default:          countedVariable = 'p'
         }
+        query.addAlias(`COUNT(${countedVariable})`, 'Count')
 
         let groups = command.groups
         if (typeof groups === 'undefined') {
