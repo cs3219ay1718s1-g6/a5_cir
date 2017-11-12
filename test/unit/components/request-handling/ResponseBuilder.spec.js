@@ -31,8 +31,8 @@ describe('ResponseBuilder', () => {
 
     it('should rearrange simple papers graph correctly', done => {
         let graph = new ResultGraph()
-        graph.addNode(12345, { label: 'Paper', paperID: 'abcdefgh', paperTitle: 'ABC of D', paperYear: 2011 })
-        graph.addNode(12346, { label: 'Paper', paperID: 'abcdefgj', paperTitle: 'EFG of H', paperYear: 2012 })
+        graph.addNode(12345, { label: 'Paper', paperID: 'abcdefgh', paperTitle: 'ABC of D', paperYear: 2011, distance: 0 })
+        graph.addNode(12346, { label: 'Paper', paperID: 'abcdefgj', paperTitle: 'EFG of H', paperYear: 2012, distance: 1 })
         graph.addNode(98765, { label: 'Author', authorID: 34567, authorName: 'Damien Chablat' })
         graph.addNode(98766, { label: 'Author', authorID: 34568, authorName: 'Cheng-Cheng Guo' })
         graph.connect(98765, 12345, 'CONTRIB_TO')
@@ -42,8 +42,8 @@ describe('ResponseBuilder', () => {
         builder.process(graph).then(result => {
             expect(result).to.be.an('object').that.is.deep.equal({
                 nodes: [
-                    { id: 12345, title: 'ABC of D', year: 2011, authors: ['Damien Chablat'  ] },
-                    { id: 12346, title: 'EFG of H', year: 2012, authors: ['Cheng-Cheng Guo' ] }
+                    { id: 12345, title: 'ABC of D', year: 2011, authors: ['Damien Chablat'  ], distance: 0 },
+                    { id: 12346, title: 'EFG of H', year: 2012, authors: ['Cheng-Cheng Guo' ], distance: 1 }
                 ],
                 links: [
                     { source: 12346, target: 12345 }

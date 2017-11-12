@@ -61,6 +61,15 @@ module.exports = class ResultGraph {
     getNode (nodeId) {
         return this._nodes[nodeId]
     }
+
+    getTargetIds(sourceId) {
+        return Object.keys(this._links[sourceId] || {}).map(parseNodeId)
+    }
+
+    getTargetNodes(sourceId) {
+        return this.getTargetIds(sourceId).map(target => this._nodes[target])
+            .filter(n => typeof n !== 'undefined')
+    }
 }
 
 const parseNodeId = (nodeId) => /^\d+$/.test(nodeId) ? parseInt(nodeId) : nodeId

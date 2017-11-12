@@ -69,6 +69,7 @@ describe('Request Handling Pipeline', () => {
                 expect(node.title).to.be.a('string')
                 expect(node.year).to.be.a('number')
                 expect(node.authors).to.be.an('array')
+                expect(node.distance).to.be.a('number').that.is.at.least(0)
             }
             for (let link of result.links) {
                 expect(link.source).to.be.a('number')

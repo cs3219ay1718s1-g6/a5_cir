@@ -55,7 +55,8 @@ module.exports = class ResponseBuilder extends Filter {
                 graph.addNode(node.id, {
                     title: node.paperTitle,
                     year: node.paperYear,
-                    authors: new Set()
+                    authors: new Set(),
+                    distance: node.distance
                 })
             }
         }
