@@ -49,13 +49,17 @@ describe('Neo4jAdapter', () => {
         ).then(result => {
             expect(result).to.be.a('resultGraph')
             expect(result.nodes).to.be.an('array').that.is.not.empty
-            for (let node of result.nodes) {
-                expect(node).to.be.an('object').that.has.all.keys('id', 'title', 'authors')
-                expect(node.authors).to.be.an('array').of('string')
-            }
             expect(result.links).to.be.an('array').that.is.not.empty
+            for (let node of result.nodes) {
+                expect(node.label).to.be.oneOf(['Author', 'Paper'])
+                if (node.label === 'Author') {
+                    expect(node).to.include.keys('authorName')
+                } else if (node.label === 'Paper') {
+                    expect(node).to.include.keys('paperTitle', 'paperYear')
+                }
+            }
             for (let link of result.links) {
-                expect(link).to.be.an('object').that.has.all.keys('source', 'target')
+                expect(link.type).to.be.oneOf(['CONTRIB_TO', 'CITES'])
             }
             done()
         }).catch(done)

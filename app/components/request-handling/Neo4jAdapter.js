@@ -72,16 +72,17 @@ module.exports = class Neo4jAdapter extends Filter {
     processGraphResult(result) {
         let graph = new ResultGraph()
 
-        const isAuthorNode = (node) => node.labels.indexOf('Author') !== -1
-        const isPaperNode = (node) => node.labels.indexOf('Paper') !== -1
-
         for (let path of result.records.map(r => r.get(0))) {
-            console.log('new path')
             for (let { start, relationship, end } of path.segments) {
-                if (isAuthorNode(start) && isPaperNode(end)) {
-                    graph.addNode(end.identity.toNumber(), end.properties)
-                }
-                // console.log("%s %s %s", start, relationship, end)
+                [start, end].forEach(node => graph.addNode(
+                    node.identity.toNumber(), 
+                    Object.assign({}, { label: node.labels[0] }, node.properties)
+                ))
+                graph.connect(
+                    start.identity.toNumber(),
+                    end.identity.toNumber(),
+                    relationship.type
+                )
             }
         }
         return graph
