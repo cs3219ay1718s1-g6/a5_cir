@@ -64,4 +64,17 @@ describe('Neo4jAdapter', () => {
             done()
         }).catch(done)
     })
+
+    it('should include distance from center for graphs', done => {
+        adapter.process(
+            `MATCH r = (:Author)-[:CONTRIB_TO]->(:Paper)-[:CITES*0..2]->(p:Paper) ` +
+            `WHERE toLower(p.paperTitle) = 'low-density parity check codes over gf(q)' ` +
+            `RETURN r;`
+        ).then(result => {
+            for (let node of result.nodes) {
+                expect(node.distance).to.be.a('number').that.is.at.least(0)
+            }
+            done()
+        }).catch(done)
+    })
 })

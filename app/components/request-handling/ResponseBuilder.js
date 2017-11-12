@@ -48,18 +48,31 @@ module.exports = class ResponseBuilder extends Filter {
     handleNetworkResult(queryResult) {
         let graph = new ResultGraph()
         let authors = {}
-        for (let node of queryResult.nodes) {
+        // Only select valid nodes
+        let nodes = queryResult.nodes.filter(node => isFinite(node.distance))
+
+        for (let node of nodes) {
             if (node.label === 'Author') {
                 authors[node.id] = node.authorName
             } else if (node.label === 'Paper') {
                 graph.addNode(node.id, {
                     title: node.paperTitle,
                     year: node.paperYear,
-                    authors: new Set()
+                    authors: new Set(),
+                    distance: node.distance
                 })
             }
         }
+
         for (let link of queryResult.links) {
+            // Skip unconnected nodes
+            if (!isFinite(queryResult.getNode(link.source).distance) ||
+                !isFinite(queryResult.getNode(link.target).distance)) {
+
+                continue
+            }
+
+            // Skip unconnected nodes
             if (link.type === 'CONTRIB_TO') {
                 graph.getNode(link.target).authors.add(authors[link.source])
             } else if (link.type === 'CITES') {

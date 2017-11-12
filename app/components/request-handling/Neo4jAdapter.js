@@ -1,7 +1,7 @@
 const neo4j = require('../database/neo4j')
 const Filter = require('../architecture/Filter')
 const ResultTable = require('../../models/ResultTable')
-const ResultGraph = require('../../models/ResultGraph')
+const ResultCenteredGraph = require('../../models/ResultCenteredGraph')
 
 const RESULT_TYPE_TABLE = 'RESULT_TYPE_TABLE'
 const RESULT_TYPE_GRAPH = 'RESULT_TYPE_GRAPH'
@@ -70,9 +70,11 @@ module.exports = class Neo4jAdapter extends Filter {
     }
 
     processGraphResult(result) {
-        let graph = new ResultGraph()
+        let records = result.records.map(r => r.get(0))
+        let centerId = records.find(p => typeof p.end !== 'undefined').end.identity.toNumber()
+        let graph = new ResultCenteredGraph(centerId)
 
-        for (let path of result.records.map(r => r.get(0))) {
+        for (let path of records) {
             for (let { start, relationship, end } of path.segments) {
                 [start, end].forEach(node => graph.addNode(
                     node.identity.toNumber(), 
@@ -94,6 +96,10 @@ module.exports = class Neo4jAdapter extends Filter {
                 )
             }
         }
+
+        // Calculate distance to center
+        graph.calculateDistance(centerId)
+
         return graph
     }
 }

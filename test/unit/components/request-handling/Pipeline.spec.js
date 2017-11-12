@@ -69,6 +69,11 @@ describe('Request Handling Pipeline', () => {
                 expect(node.title).to.be.a('string')
                 expect(node.year).to.be.a('number')
                 expect(node.authors).to.be.an('array')
+                if (node.title.toLowerCase() === 'low-density parity check codes over gf(q)') {
+                    expect(node.distance).to.equal(0)
+                } else {
+                    expect(node.distance).to.be.a('number').that.is.at.least(1)
+                }
             }
             for (let link of result.links) {
                 expect(link.source).to.be.a('number')

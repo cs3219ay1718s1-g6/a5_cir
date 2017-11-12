@@ -42,9 +42,25 @@ describe('ResultGraph', () => {
         expect(() => graph.connect(0, 1)).to.throw()
     })
 
-    it('should allow querying of a node by its id', () => {
+    it('should allow querying of a node by its ID', () => {
         let graph = new ResultGraph()
         graph.addNode(1234, { name: 'b' })
         expect(graph.getNode(1234)).to.deep.equal({ name: 'b' })
+    })
+
+    it('should allow getting target nodes\' IDs from a source ID', () => {
+        let graph = new ResultGraph()
+        graph.addNode(0, { name: 'a' })
+        graph.addNode(1, { name: 'b' })
+        graph.connect(0, 1)
+        expect(graph.getTargetIds(0)).to.be.an('array').that.has.all.members([1])
+    })
+
+    it('should allow getting target nodes\' from a source ID', () => {
+        let graph = new ResultGraph()
+        graph.addNode(0, { name: 'a' })
+        let target = graph.addNode(1, { name: 'b' })
+        graph.connect(0, 1)
+        expect(graph.getTargetNodes(0)).to.be.an('array').that.has.all.members([target])
     })
 })
