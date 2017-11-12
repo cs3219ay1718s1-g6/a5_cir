@@ -121,6 +121,22 @@ describe('QueryBuilder', () => {
         }).catch(done)
     })
 
+    it('should build simple `count authors` queries correctly', done => {
+        builder.process({
+            count: 'authors',
+            venues: ['arxiv', 'icse']
+        }).then(result => {
+            expect(result).to.be.a('string').that.is.equal(
+                `MATCH (p:Paper)-[:WITHIN]->(v:Venue) ` +
+                `MATCH (a:Author)-[:CONTRIB_TO]->(p) ` +
+                `WHERE v.venueID IN ['arxiv', 'icse'] ` +
+                `WITH v.venueName AS Venue, COUNT(a) AS Count ` +
+                `RETURN Venue, Count;`
+            )
+            done()
+        }).catch(done)
+    })
+
     it('should include years if the `groups` parameter demands it', done => {
         builder.process({
             count: 'citations',
