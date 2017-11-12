@@ -250,4 +250,35 @@ describe('QueryBuilder', () => {
             done()
         }).catch(done)
     })
+
+    it('should build a simple `count phrases` query correctly', done => {
+        builder.process({
+            count: 'phrases',
+            venues: ['arxiv', 'icse'] 
+        }).then(result => {
+            expect(result).to.be.a('string').that.is.equal(
+                `MATCH (w:Phrase)<-[:CONTAINS]-(p:Paper)-[:WITHIN]->(v:Venue) ` +
+                `WHERE v.venueID IN ['arxiv', 'icse'] ` +
+                `WITH v.venueName AS Venue, w.phraseValue AS Phrase, COUNT(p) AS Count ` +
+                `RETURN Venue, Phrase, Count;`
+            )
+            done()
+        }).catch(done)
+    })
+
+    it('should build a simple `top phrases` query correctly', done => {
+        builder.process({
+            top: 'phrases',
+            years: [2012, 2013, 2014],
+            limit: 10
+        }).then(result => {
+            expect(result).to.be.a('string').that.is.equal(
+                `MATCH (w:Phrase)<-[:CONTAINS]-(p:Paper) ` +
+                `WHERE p.paperYear IN [2012, 2013, 2014] ` +
+                `WITH p.paperYear AS Year, w.phraseValue AS Phrase, COUNT(p) AS Count ` +
+                `ORDER BY Count DESC RETURN Year, Phrase, Count LIMIT 10;`
+            )
+            done()
+        }).catch(done)
+    })
 })
