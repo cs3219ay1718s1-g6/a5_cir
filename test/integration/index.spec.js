@@ -92,15 +92,17 @@ describe('Integration: Pipelining Filters', () => {
             expect(data).to.be.an('object').that.includes.all.keys('nodes', 'links')
             expect(data.nodes).to.be.an('array').that.is.not.empty
             expect(data.links).to.be.an('array').that.is.not.empty
-            expect(data.nodes[0]).to.be.an('object').that.includes.all.keys('id', 'title', 'year', 'authors')
+            expect(data.nodes[0]).to.be.an('object').that.includes.all.keys('id', 'title', 'year', 'authors', 'distance')
+            expect(data.links[0]).to.be.an('object').that.includes.all.keys('source', 'target')
+
             for (let node of data.nodes) {
                 if (node.title.toLowerCase() === 'low-density parity check codes over gf(q)') {
-                    expect(node.distance).to.be(0)
+                    expect(node.distance).to.equal(0)
                 } else {
                     expect(node.distance).to.be.a('number').that.is.at.least(1)
                 }
             }
-            expect(data.links[0]).to.be.an('object').that.includes.all.keys('source', 'target')
+
             done()
         }).catch(done)
     })

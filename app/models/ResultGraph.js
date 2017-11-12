@@ -5,7 +5,7 @@ module.exports = class ResultGraph {
     }
 
     addNode(id, value) {
-        if (!this._nodes.hasOwnProperty(id)) {
+        if (!this.hasNode(id)) {
             this._nodes[id] = value
             this._cachedNodes = undefined
         }
@@ -13,8 +13,8 @@ module.exports = class ResultGraph {
     }
 
     connect(sourceId, targetId, type = true) {
-        if (!this._nodes.hasOwnProperty(sourceId) ||
-            !this._nodes.hasOwnProperty(targetId)) {
+        if (!this.hasNode(sourceId) ||
+            !this.hasNode(targetId)) {
 
             throw new Error('Can only connect existing nodes')
         }
@@ -35,7 +35,7 @@ module.exports = class ResultGraph {
     get nodes () {
         if (typeof this._cachedNodes === 'undefined') {
             this._cachedNodes = Object.keys(this._nodes).map(id => Object.assign({}, this._nodes[id], { 
-                id: parseNodeId(id)
+                id: ResultGraph.parseNodeId(id)
             }))
         }
         return this._cachedNodes
@@ -45,8 +45,8 @@ module.exports = class ResultGraph {
         if (typeof this._cachedLinks === 'undefined') {
             this._cachedLinks = Object.keys(this._links).map(sourceId => Object.keys(this._links[sourceId]).map(targetId => {
                 let linkObject = {
-                    source: parseNodeId(sourceId),
-                    target: parseNodeId(targetId)
+                    source: ResultGraph.parseNodeId(sourceId),
+                    target: ResultGraph.parseNodeId(targetId)
                 }
                 let linkType = this._links[sourceId][targetId]
                 if (linkType !== true) {
@@ -58,18 +58,24 @@ module.exports = class ResultGraph {
         return this._cachedLinks
     }
 
+    hasNode (nodeId) {
+        return this._nodes.hasOwnProperty(nodeId)
+    }
+
     getNode (nodeId) {
         return this._nodes[nodeId]
     }
 
     getTargetIds(sourceId) {
-        return Object.keys(this._links[sourceId] || {}).map(parseNodeId)
+        return Object.keys(this._links[sourceId] || {}).map(ResultGraph.parseNodeId)
     }
 
     getTargetNodes(sourceId) {
         return this.getTargetIds(sourceId).map(target => this._nodes[target])
             .filter(n => typeof n !== 'undefined')
     }
-}
 
-const parseNodeId = (nodeId) => /^\d+$/.test(nodeId) ? parseInt(nodeId) : nodeId
+    static parseNodeId (nodeId) {
+        return /^\d+$/.test(nodeId) ? parseInt(nodeId) : nodeId
+    }
+}

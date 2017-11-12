@@ -33,7 +33,7 @@ module.exports = class ResultCenteredGraph extends ResultGraph {
             // Set all the nodes in the frontier to have distance of the current distance
             frontier.forEach(nodeId => {
                 this._nodes[nodeId].distance = distance
-                updatedNodeIds.add(nodeId)
+                updatedNodeIds.add(ResultGraph.parseNodeId(nodeId))
             })
             // Increment the distance
             distance += 1
@@ -46,8 +46,11 @@ module.exports = class ResultCenteredGraph extends ResultGraph {
         }
 
         // Set all the unreached nodes to have distance of Infinity
-        Object.keys(this._nodes).filter(nodeId => !updatedNodeIds.has(nodeId)).forEach(nodeId => {
+        Object.keys(this._nodes).filter(nodeId => !updatedNodeIds.has(ResultGraph.parseNodeId(nodeId))).forEach(nodeId => {
             this._nodes[nodeId].distance = Infinity
         })
+
+        // Clear cache
+        this._cachedNodes = undefined
     }
 }
